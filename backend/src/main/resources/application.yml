@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: dev  # 기본 활성 프로필. 운영 시 prod로 override 가능
+    active: prod  # 기본 활성 프로필. 운영 시 prod로 override 가능
   config:
     import: application-secret.yml  # 민감정보 import
 
