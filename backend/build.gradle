@@ -40,7 +40,14 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+    // webClient 의존성
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    // PostgreSQL 의존성, Redis 캐시용
+    implementation 'org.postgresql:postgresql'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis' // Redis 캐시용
 }
 
 tasks.named('test') {

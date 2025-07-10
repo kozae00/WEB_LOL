@@ -1,11 +1,13 @@
 package com.example.web_lol_be.domain.summoner.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
 
+/*
+    소환사 정보를 저장하는 JPA Entity입니다.
+    puuid는 Riot에서 발급되는 고유한 ID이며, 유일해야 하므로 unique 제약이 있습니다.
+*/
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -14,17 +16,15 @@ import java.time.LocalDateTime;
 public class Summoner {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
+    @Column(unique = true, nullable = false)
     private String puuid;
-    private String accountId;
-    private String name;
-    private int profileIconId;
-    private int summonerLevel;
-    private String tier;
-    private String rank;
-    private int leaguePoints;
-    private int wins;
-    private int losses;
-    private LocalDateTime lastUpdated;
+
+    @Column(nullable = false)
+    private String gameName;
+
+    @Column(nullable = false)
+    private String tagLine;
 }
