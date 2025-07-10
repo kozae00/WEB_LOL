@@ -14,6 +14,11 @@ spring:
         format_sql: true                        # SQL을 보기 좋게 출력
         dialect: org.hibernate.dialect.PostgreSQLDialect  # PostgreSQL용 방언
 
+  data:
+    redis:
+      host: localhost                # Redis 호스트
+      port: 6379                     # Redis 포트
+
 logging:
   level:
     org.hibernate.SQL: debug

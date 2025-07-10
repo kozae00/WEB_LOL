@@ -5,12 +5,16 @@ import com.example.web_lol_be.domain.summoner.repository.SummonerRepository;
 import com.example.web_lol_be.global.riot.RiotApiClient;
 import com.example.web_lol_be.global.riot.dto.RiotAccountDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+
+import java.time.Duration;
+import java.util.Optional;
 
 
 /*
-    아래 서비스는 Redis 캐시는 생략하고,
-    DB → 없으면 Riot API 호출 → DB 저장하는 기본 구조입니다.
+    Redis → DB → Riot API 순으로 소환사 정보를 조회합니다.
+    조회 시 캐시에 저장하여 반복 요청 시 빠르게 응답할 수 있습니다.
 */
 @Service
 @RequiredArgsConstructor
@@ -18,21 +22,39 @@ public class SummonerService {
 
     private final RiotApiClient riotApiClient;
     private final SummonerRepository summonerRepository;
+    private final RedisTemplate<String, Summoner> redisTemplate;
 
-    /*
-        Riot ID (gameName + tagLine)를 기반으로 소환사 정보를 조회합니다.
-        DB에 이미 존재하면 반환하고, 없으면 Riot API를 통해 받아온 후 저장합니다.
-     */
     public Summoner getOrCreateSummoner(String gameName, String tagLine) {
-        return summonerRepository.findByGameNameAndTagLine(gameName, tagLine)
-                .orElseGet(() -> {
-                    RiotAccountDto dto = riotApiClient.getAccountByRiotId(gameName, tagLine);
-                    Summoner newSummoner = Summoner.builder()
-                            .puuid(dto.getPuuid())
-                            .gameName(dto.getGameName())
-                            .tagLine(dto.getTagLine())
-                            .build();
-                    return summonerRepository.save(newSummoner);
-                });
+        /*
+            1. Redis 캐시 조회
+            key 형식: Hide on bush#KR1
+        */
+        String cacheKey = gameName + "#" + tagLine;
+        Summoner cached = redisTemplate.opsForValue().get(cacheKey);
+        if (cached != null) return cached;
+
+        /*
+            2. DB에서 조회
+         */
+        Optional<Summoner> found = summonerRepository.findByGameNameAndTagLine(gameName, tagLine);
+        if (found.isPresent()) {
+            redisTemplate.opsForValue().set(cacheKey, found.get(), Duration.ofMinutes(30));
+            return found.get();
+        }
+
+        /*
+            3. Riot API 호출 및 저장
+         */
+        RiotAccountDto dto = riotApiClient.getAccountByRiotId(gameName, tagLine);
+        Summoner newSummoner = summonerRepository.save(Summoner.builder()
+                .puuid(dto.getPuuid())
+                .gameName(dto.getGameName())
+                .tagLine(dto.getTagLine())
+                .build());
+
+        // 캐시에 저장 (30분 유효)
+        redisTemplate.opsForValue().set(cacheKey, newSummoner, Duration.ofMinutes(30));
+
+        return newSummoner;
     }
 }
