@@ -28,10 +28,7 @@ public class SummonerController {
     }
 
     @GetMapping("/full-info")
-    public SummonerFullInfoDto getFullSummonerInfo(
-            @RequestParam String gameName,
-            @RequestParam String tagLine
-    ) {
+    public SummonerFullInfoDto getFullSummonerInfo(@RequestParam String gameName, @RequestParam String tagLine) {
         return summonerService.getFullInfo(gameName, tagLine);
     }
 }
