@@ -1,5 +1,6 @@
 package com.example.web_lol_be.domain.summoner.contoller;
 
+import com.example.web_lol_be.domain.summoner.dto.SummonerFullInfoDto;
 import com.example.web_lol_be.domain.summoner.entity.Summoner;
 import com.example.web_lol_be.domain.summoner.service.SummonerService;
 import lombok.RequiredArgsConstructor;
@@ -24,5 +25,13 @@ public class SummonerController {
     public Summoner getOrCreateSummoner(@RequestParam String gameName,
                                         @RequestParam String tagLine) {
         return summonerService.getOrCreateSummoner(gameName, tagLine);
+    }
+
+    @GetMapping("/full-info")
+    public SummonerFullInfoDto getFullSummonerInfo(
+            @RequestParam String gameName,
+            @RequestParam String tagLine
+    ) {
+        return summonerService.getFullInfo(gameName, tagLine);
     }
 }
