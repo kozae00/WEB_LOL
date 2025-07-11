@@ -1,14 +1,18 @@
 package com.example.web_lol_be.domain.summoner.service;
 
+import com.example.web_lol_be.domain.summoner.dto.SummonerFullInfoDto;
 import com.example.web_lol_be.domain.summoner.entity.Summoner;
 import com.example.web_lol_be.domain.summoner.repository.SummonerRepository;
 import com.example.web_lol_be.global.riot.RiotApiClient;
+import com.example.web_lol_be.global.riot.dto.LeagueEntryDto;
 import com.example.web_lol_be.global.riot.dto.RiotAccountDto;
+import com.example.web_lol_be.global.riot.dto.SummonerDetailDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -56,5 +60,13 @@ public class SummonerService {
         redisTemplate.opsForValue().set(cacheKey, newSummoner, Duration.ofMinutes(30));
 
         return newSummoner;
+    }
+
+    public SummonerFullInfoDto getFullInfo(String gameName, String tagLine) {
+        RiotAccountDto account = riotApiClient.getAccountByRiotId(gameName, tagLine);
+        SummonerDetailDto detail = riotApiClient.getSummonerDetailByPuuid(account.getPuuid());
+        List<LeagueEntryDto> leagues = riotApiClient.getLeagueEntriesBySummonerId(detail.getId());
+
+        return SummonerFullInfoDto.of(account, detail, leagues);
     }
 }
