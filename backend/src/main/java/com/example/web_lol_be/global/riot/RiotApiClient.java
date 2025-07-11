@@ -3,6 +3,7 @@ package com.example.web_lol_be.global.riot;
 import com.example.web_lol_be.global.riot.dto.LeagueEntryDto;
 import com.example.web_lol_be.global.riot.dto.RiotAccountDto;
 import com.example.web_lol_be.global.riot.dto.SummonerDetailDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -44,11 +45,21 @@ public class RiotApiClient {
      * base URL: https://kr.api.riotgames.com
      */
     public SummonerDetailDto getSummonerDetailByPuuid(String puuid) {
-        return krWebClient.get()
+        String rawJson = krWebClient.get()
                 .uri("/lol/summoner/v4/summoners/by-puuid/{puuid}", puuid)
                 .retrieve()
-                .bodyToMono(SummonerDetailDto.class)
+                .bodyToMono(String.class)
                 .block();
+
+        System.out.println("Raw response = " + rawJson);
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readValue(rawJson, SummonerDetailDto.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /*

@@ -65,8 +65,14 @@ public class SummonerService {
     public SummonerFullInfoDto getFullInfo(String gameName, String tagLine) {
         RiotAccountDto account = riotApiClient.getAccountByRiotId(gameName, tagLine);
         SummonerDetailDto detail = riotApiClient.getSummonerDetailByPuuid(account.getPuuid());
+
+        if (detail == null) {
+            throw new IllegalStateException("SummonerDetailDto is null - API 응답이 비어있습니다.");
+        }
+
         List<LeagueEntryDto> leagues = riotApiClient.getLeagueEntriesBySummonerId(detail.getId());
 
         return SummonerFullInfoDto.of(account, detail, leagues);
     }
+
 }

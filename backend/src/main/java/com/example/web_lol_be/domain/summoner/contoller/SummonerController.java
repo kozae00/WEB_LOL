@@ -27,8 +27,15 @@ public class SummonerController {
         return summonerService.getOrCreateSummoner(gameName, tagLine);
     }
 
+    /**
+     * 전체 소환사 정보 조회 (계정 정보, 상세 정보, 랭크 정보 포함)
+     * 예시: /api/v1/summoner/full-info?gameName=Hide%20on%20bush&tagLine=KR1
+     */
     @GetMapping("/full-info")
-    public SummonerFullInfoDto getFullSummonerInfo(@RequestParam String gameName, @RequestParam String tagLine) {
+    public SummonerFullInfoDto getFullSummonerInfo(
+            @RequestParam String gameName,
+            @RequestParam String tagLine
+    ) {
         return summonerService.getFullInfo(gameName, tagLine);
     }
 }
